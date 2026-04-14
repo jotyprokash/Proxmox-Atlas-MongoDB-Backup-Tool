@@ -1,0 +1,6 @@
+.env
+conf/backup.conf
+*.gz
+*.archive
+*.log
+.DS_Store
