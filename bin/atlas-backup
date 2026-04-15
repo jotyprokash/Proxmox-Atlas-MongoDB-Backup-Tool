@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+set -eo pipefail
+
+CONFIG_FILE="/etc/atlas-backup/backup.conf"
+
+if [[ ! -f "$CONFIG_FILE" ]]; then
+    echo "Error: Configuration file not found at $CONFIG_FILE"
+    exit 1
+fi
+
+source "$CONFIG_FILE"
+
+# Ensure required variables are set
+if [[ -z "$ATLAS_URI" ]] || [[ -z "$BACKUP_DIR" ]]; then
+    echo "Error: ATLAS_URI and BACKUP_DIR must be set in $CONFIG_FILE"
+    exit 1
+fi
+
+TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
+BACKUP_FILE="${BACKUP_DIR}/atlas_backup_${TIMESTAMP}.archive.gz"
+LOG_FILE="${BACKUP_DIR}/atlas_backup.log"
+
+mkdir -p "$BACKUP_DIR"
+
+log_msg() {
+    echo "$(date +'%Y-%m-%d %H:%M:%S') - $1" | tee -a "$LOG_FILE"
+}
+
+notify() {
+    local status="$1"
+    local message="$2"
+    if [[ -n "$WEBHOOK_URL" ]]; then
+        # Check if it's Slack/Discord or Healthchecks
+        if [[ "$WEBHOOK_URL" == *"healthchecks"* ]] || [[ "$WEBHOOK_URL" == *"hc-ping"* ]]; then
+            if [[ "$status" == "success" ]]; then
+                curl -fsS -m 10 --retry 3 "$WEBHOOK_URL" > /dev/null
+            else
+                curl -fsS -m 10 --retry 3 "${WEBHOOK_URL}/fail" -d "$message" > /dev/null
+            fi
+        else
+            # Simple Slack/Discord JSON webhook
+            local color=$([[ "$status" == "success" ]] && echo "36a64f" || echo "ff0000")
+            local payload="{\"attachments\":[{\"color\":\"${color}\",\"title\":\"Atlas Backup ${status}\",\"text\":\"${message}\"}]}"
+            curl -s -X POST -H "Content-Type: application/json" -d "$payload" "$WEBHOOK_URL" > /dev/null
+        fi
+    fi
+}
+
+log_msg "Starting Atlas backup..."
+
+# Perform the backup
+if mongodump --uri="$ATLAS_URI" --archive="$BACKUP_FILE" --gzip; then
+    log_msg "Backup completed successfully: $BACKUP_FILE"
+    
+    # Run retention policy
+    if [[ -n "$RETENTION_DAYS" ]] && [[ "$RETENTION_DAYS" -gt 0 ]]; then
+        log_msg "Cleaning up backups older than ${RETENTION_DAYS} days..."
+        find "$BACKUP_DIR" -type f -name "atlas_backup_*.archive.gz" -mtime +${RETENTION_DAYS} -exec rm -f {} \;
+        log_msg "Cleanup complete."
+    fi
+    
+    notify "success" "Backup successfully created and verified on $(hostname)."
+else
+    log_msg "ERROR: Backup failed."
+    notify "failure" "Backup failed on $(hostname)! Please check logs."
+    exit 1
+fi
