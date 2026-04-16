@@ -1,0 +1,13 @@
+[Unit]
+Description=MongoDB Atlas Backup Service
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/atlas-backup
+User=root
+
+# Hardening
+ProtectSystem=full
+PrivateTmp=true
