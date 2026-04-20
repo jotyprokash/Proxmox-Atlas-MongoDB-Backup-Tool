@@ -13,7 +13,26 @@ We used a lightweight **Ubuntu 24.04 (Noble)** LXC container to host the backup 
 
 ![Proxmox CT Setup](./assets/screenshots/proxmox_ct_setup.png)
 
-## 2. Installing Dependencies
+## 2. MongoDB Atlas Preparation
+
+Before the backup tool can connect, we must configure the Atlas security layer.
+
+### Network Whitelisting
+Added the Proxmox Public IP to the Network Access list to allow incoming connections.
+
+![Atlas Network Access](./assets/screenshots/atlas_network_access.png)
+
+### Dedicated Backup User
+Created a dedicated user with `readAnyDatabase` privileges for secure, scoped access.
+
+![Atlas User Setup](./assets/screenshots/atlas_user_setup.png)
+
+### Connection String
+Retrieved the SRV connection string from the "Connect" menu for use in the configuration.
+
+![Atlas Connection String](./assets/screenshots/atlas_connection_string.png)
+
+## 3. Installing Dependencies
 
 Before installing our tool, we need to prepare the Ubuntu environment with `mongodb-database-tools` and standard utilities.
 
@@ -43,7 +62,7 @@ apt install -y mongodb-database-tools
 
 ![Dependency Installation](./assets/screenshots/dependency_installation.png)
 
-## 3. Deploying the Backup Tool
+## 4. Deploying the Backup Tool
 
 Now we pull the code from GitHub and use the automated installer.
 
@@ -56,7 +75,7 @@ make install
 ### Step 3: Deploying the Backup Tool
 ![Deployment Output](./assets/screenshots/make_install_output.png)
 
-## 4. Configuration
+## 5. Configuration
 
 Edit the configuration file to add your MongoDB Atlas connection string and preferred notification webhook.
 
@@ -68,7 +87,7 @@ nano /etc/atlas-backup/backup.conf
 - `ATLAS_URI`: Your `mongodb+srv://...` connection string.
 - `WEBHOOK_URL`: Discord/Slack webhook for alerts.
 
-## 5. Verification
+## 6. Verification
 
 ### Manual Backup Test
 Run the backup manually to ensure everything is configured correctly.
