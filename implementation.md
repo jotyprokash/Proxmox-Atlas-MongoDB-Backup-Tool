@@ -108,5 +108,3 @@ systemctl list-timers --all | grep atlas
 
 ![Systemd Timer Active](./assets/screenshots/systemd_timer_active.png)
 
----
-*This journey ensures a robust, production-grade backup pipeline is in place.*
