@@ -2,6 +2,8 @@
 
 This document captures the step-by-step process of deploying the Proxmox Atlas Backup tool, from setting up the environment to final verification.
 
+![Architecture Diagram](./assets/screenshots/architecture_diagram.png)
+
 ## 1. Environment Setup (Proxmox LXC)
 
 We used a lightweight **Ubuntu 24.04 (Noble)** LXC container to host the backup utility.

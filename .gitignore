@@ -4,3 +4,4 @@ conf/backup.conf
 *.archive
 *.log
 .DS_Store
+venv/

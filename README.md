@@ -6,7 +6,12 @@
 
 A production-grade, automated backup solution designed to safely pull MongoDB Atlas clusters to local Proxmox LXC infrastructure. Engineered for reliability, observability, and minimal overhead.
 
-##  Key Features
+> [!NOTE]
+> **Architecture-as-Code**: This project's system design is managed using a centralized design repository (`Cloud-Archi-Repos`). The source code for the diagram below is versioned independently to maintain a clean production environment.
+
+![Architecture Diagram](./assets/screenshots/architecture_diagram.png)
+
+## 🚀 Key Features
 - **Automated Lifecycle**: Daily backups via `systemd` timers with built-in retention management.
 - **Observability**: Integrated logging and webhook support (Discord/Slack/Healthchecks).
 - **Hardened Security**: Principle of least privilege applied to unprivileged LXC and restricted config permissions.
