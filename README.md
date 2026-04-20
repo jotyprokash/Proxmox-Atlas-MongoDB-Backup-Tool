@@ -1,5 +1,7 @@
 # Proxmox Atlas Backup
 
+[![Implementation Journey](https://img.shields.io/badge/Implementation-Journey-blueviolet?style=for-the-badge&logo=gitbook)](./implementation.md)
+
 A robust, production-grade utility to safely and automatically backup a MongoDB Atlas (Free Tier) cluster to a local Linux system (like a Proxmox LXC container).
 
 ## Features
