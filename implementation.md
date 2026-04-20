@@ -11,8 +11,7 @@ We used a lightweight **Ubuntu 24.04 (Noble)** LXC container to host the backup 
 - **Resources**: 512MB RAM, 1 CPU, 10GB Disk
 - **Type**: Unprivileged (for security)
 
-> [!NOTE]
-> *Screenshot: Proxmox interface showing the created CT 100.*
+![Proxmox CT Setup](./assets/screenshots/proxmox_ct_setup.png)
 
 ## 2. Installing Dependencies
 
@@ -33,14 +32,16 @@ curl -fsSL https://www.mongodb.org/static/pgp/server-7.0.asc | \
    gpg -o /usr/share/keyrings/mongodb-server-7.0.gpg \
    --dearmor
 
-# Add the repository (using Noble for Ubuntu 24.04)
-echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-7.0.gpg ] https://repo.mongodb.org/apt/ubuntu noble/mongodb-org/7.0 multiverse" | \
+# Add the repository (using Jammy for 22.04 compatibility as Noble path is pending)
+echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-7.0.gpg ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/7.0 multiverse" | \
    tee /etc/apt/sources.list.d/mongodb-org-7.0.list
 
 # Install tools
 apt update
 apt install -y mongodb-database-tools
 ```
+
+![Dependency Installation](./assets/screenshots/dependency_installation.png)
 
 ## 3. Deploying the Backup Tool
 
@@ -52,8 +53,8 @@ cd Proxmox-Atlas-MongoDB-Backup-Tool
 make install
 ```
 
-> [!NOTE]
-> *Screenshot: Terminal output of `make install` showing successful deployment.*
+### Step 3: Deploying the Backup Tool
+![Deployment Output](./assets/screenshots/make_install_output.png)
 
 ## 4. Configuration
 
@@ -76,8 +77,8 @@ Run the backup manually to ensure everything is configured correctly.
 atlas-backup
 ```
 
-> [!NOTE]
-> *Screenshot: Logs showing a successful backup and a Discord/Slack notification.*
+### Manual Backup Test
+![Manual Backup Success](./assets/screenshots/manual_backup_success.png)
 
 ### Systemd Automation
 Verify that the daily timer is scheduled.
