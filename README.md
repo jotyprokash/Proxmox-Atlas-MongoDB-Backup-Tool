@@ -1,8 +1,12 @@
 # Proxmox Atlas Backup Utility
 
-[![Implementation Journey](https://img.shields.io/badge/Detailed-Implementation_Journey-blueviolet?style=for-the-badge&logo=gitbook)](./implementation.md)
-![Linux](https://img.shields.io/badge/Platform-Linux-lightgrey?style=for-the-badge&logo=linux)
-![MongoDB](https://img.shields.io/badge/Database-MongoDB_Atlas-green?style=for-the-badge&logo=mongodb)
+[![Proxmox](https://img.shields.io/badge/Proxmox-E74C3C?style=flat-square&logo=proxmox&logoColor=white)](https://proxmox.com)
+[![MongoDB Atlas](https://img.shields.io/badge/MongoDB_Atlas-47A248?style=flat-square&logo=mongodb&logoColor=white)](https://mongodb.com/atlas)
+[![Ubuntu 24.04](https://img.shields.io/badge/Ubuntu_24.04-E95420?style=flat-square&logo=ubuntu&logoColor=white)](https://ubuntu.com)
+[![Systemd](https://img.shields.io/badge/Systemd-000000?style=flat-square&logo=linux&logoColor=white)](https://systemd.io)
+[![Bash](https://img.shields.io/badge/Bash-4EAA25?style=flat-square&logo=gnu-bash&logoColor=white)](https://www.gnu.org/software/bash/)
+[![Discord](https://img.shields.io/badge/Discord-5865F2?style=flat-square&logo=discord&logoColor=white)](https://discord.com)
+[![Implementation Journey](https://img.shields.io/badge/Docs-Implementation_Journey-blueviolet?style=flat-square&logo=gitbook)](./implementation.md)
 
 A production-grade, automated backup solution designed to safely pull MongoDB Atlas clusters to local Proxmox LXC infrastructure. Engineered for reliability, observability, and minimal overhead.
 
