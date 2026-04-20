@@ -6,15 +6,15 @@
 
 A production-grade, automated backup solution designed to safely pull MongoDB Atlas clusters to local Proxmox LXC infrastructure. Engineered for reliability, observability, and minimal overhead.
 
-## 🚀 Key Features
+##  Key Features
 - **Automated Lifecycle**: Daily backups via `systemd` timers with built-in retention management.
 - **Observability**: Integrated logging and webhook support (Discord/Slack/Healthchecks).
 - **Hardened Security**: Principle of least privilege applied to unprivileged LXC and restricted config permissions.
 - **Idempotent Deployment**: Simple `make` based installation and uninstallation logic.
 
----
 
-## 🛠 Quick Start
+
+##  Quick Start
 
 ### 1. Installation
 Deploy directly to your Proxmox LXC (Ubuntu/Debian):
@@ -37,19 +37,17 @@ sudo atlas-backup
 sudo journalctl -u atlas-backup.service -f
 ```
 
----
 
-## 📖 Deep Dive
+
+##  Deep Dive
 For a comprehensive, step-by-step walkthrough of the architectural decisions, Proxmox setup, and verification evidence, please refer to the:
 
-👉 **[Implementation Journey](./implementation.md)**
+ **[Implementation Journey](./implementation.md)**
 
----
 
-## 🏗 Operations
+
+##  Operations
 - **Manual Trigger**: `sudo systemctl start atlas-backup.service`
 - **Timer Status**: `systemctl list-timers --all | grep atlas`
 - **Restore**: `sudo atlas-restore /path/to/backup.archive.gz`
 
----
-*Maintained by [Joty Prokash](https://github.com/jotyprokash)*
