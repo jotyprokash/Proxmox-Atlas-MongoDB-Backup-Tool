@@ -1,9 +1,9 @@
 [Unit]
-Description=Run Atlas Backup Daily
+Description=Run Atlas Backup (Full/Incremental)
 
 [Timer]
-# Run at 2:00 AM every day
-OnCalendar=*-*-* 02:00:00
+# Run every 6 hours
+OnCalendar=00/6:00:00
 Persistent=true
 RandomizedDelaySec=300
 
