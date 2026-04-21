@@ -1,39 +1,61 @@
 #!/usr/bin/env bash
 set -eo pipefail
 
-if [[ $# -lt 1 ]]; then
-    echo "Usage: atlas-restore <path_to_archive.gz> [target_uri]"
-    echo "If target_uri is not provided, it will use ATLAS_URI from /etc/atlas-backup/backup.conf"
+CONFIG_FILE="/etc/atlas-backup/backup.conf"
+[[ ! -f "$CONFIG_FILE" ]] && CONFIG_FILE="./conf/backup.conf"
+
+if [[ ! -f "$CONFIG_FILE" ]]; then
+    echo "Error: Configuration file not found."
     exit 1
 fi
 
-ARCHIVE_FILE="$1"
-TARGET_URI="$2"
+source "$CONFIG_FILE"
 
-if [[ ! -f "$ARCHIVE_FILE" ]]; then
-    echo "Error: File not found: $ARCHIVE_FILE"
-    exit 1
-fi
+TARGET_URI="${1:-$ATLAS_URI}"
+BACKUP_DIR="${BACKUP_DIR:-/var/lib/atlas-backup}"
 
 if [[ -z "$TARGET_URI" ]]; then
-    CONFIG_FILE="/etc/atlas-backup/backup.conf"
-    if [[ -f "$CONFIG_FILE" ]]; then
-        source "$CONFIG_FILE"
-        TARGET_URI="$ATLAS_URI"
-    else
-        echo "Error: TARGET_URI not provided and config file not found."
-        exit 1
+    echo "Usage: $0 [TARGET_URI]"
+    exit 1
+fi
+
+echo "Searching for latest backups in $BACKUP_DIR..."
+
+# 1. Find latest Full Backup
+LATEST_FULL=$(ls -t "${BACKUP_DIR}"/atlas_full_*.archive.gz 2>/dev/null | head -n 1)
+
+if [[ -z "$LATEST_FULL" ]]; then
+    echo "Error: No full backup found in $BACKUP_DIR"
+    exit 1
+fi
+
+echo "Found latest full backup: $LATEST_FULL"
+
+# 2. Find all Incremental Slices created AFTER the latest full backup
+FULL_DATE=$(echo "$LATEST_FULL" | grep -oE '[0-9]{8}_[0-9]{6}')
+INCREMENTS=$(ls "${BACKUP_DIR}"/atlas_incr_*.archive.gz 2>/dev/null | awk -v d="$FULL_DATE" '$0 > d' | sort)
+
+# 3. Restore Full Base
+echo "Restoring full base..."
+mongorestore --uri="$TARGET_URI" --archive="$LATEST_FULL" --gzip --oplogReplay
+
+# 4. Replay Incremental Slices
+for INCR in $INCREMENTS; do
+    echo "Applying incremental slice: $INCR"
+    # To replay an oplog-only dump, we extract the oplog.rs.bson and treat it as the oplog
+    TEMP_DIR=$(mktemp -d)
+    mongorestore --uri="$TARGET_URI" --archive="$INCR" --gzip --extract --dir="$TEMP_DIR"
+    
+    # Locate the bson file (it will be under local/oplog.rs.bson)
+    OPLOG_BSON=$(find "$TEMP_DIR" -name "oplog.rs.bson")
+    
+    if [[ -f "$OPLOG_BSON" ]]; then
+        # mongorestore expects 'oplog.bson' for --oplogReplay
+        mv "$OPLOG_BSON" "${TEMP_DIR}/oplog.bson"
+        mongorestore --uri="$TARGET_URI" --oplogReplay "${TEMP_DIR}"
     fi
-fi
+    
+    rm -rf "$TEMP_DIR"
+done
 
-echo "WARNING: You are about to restore $ARCHIVE_FILE to the target database."
-echo "This may overwrite existing data. Target URI: $(echo "$TARGET_URI" | sed 's/\(mongodb+srv:\/\/[^:]*:\)[^@]*@/\1****@/')"
-read -p "Are you sure you want to proceed? (y/N): " confirm
-
-if [[ "$confirm" =~ ^[Yy]$ ]]; then
-    echo "Starting restore..."
-    mongorestore --uri="$TARGET_URI" --archive="$ARCHIVE_FILE" --gzip --drop
-    echo "Restore complete."
-else
-    echo "Restore aborted."
-fi
+echo "Restore completed successfully."
