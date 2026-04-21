@@ -1,6 +1,5 @@
 # Atlas MongoDB Connection URI
-# Example: mongodb+srv://backup_svc_account:PASSWORD@cluster0.abcde.mongodb.net/?retryWrites=true&w=majority
-ATLAS_URI="mongodb+srv://<USER>:<PASSWORD>@<CLUSTER_URL>"
+ATLAS_URI="mongodb+srv://<USER>:<PASSWORD>@<CLUSTER_URL>/dt-mm-db"
 
 # Local directory where backups will be stored
 BACKUP_DIR="/var/lib/atlas-backup"
@@ -8,5 +7,10 @@ BACKUP_DIR="/var/lib/atlas-backup"
 # Retention policy: Number of days to keep backups
 RETENTION_DAYS=7
 
-# Optional: Webhook URL for success/failure notifications (Slack, Discord, Healthchecks.io)
+# Incremental Strategy
+# Set FULL_BACKUP_DAY to 0-6 (0 is Sunday)
+FULL_BACKUP_DAY=0
+STATE_FILE="/var/lib/atlas-backup/checkpoint.json"
+
+# Optional: Webhook URL for success/failure notifications
 # WEBHOOK_URL="https://hc-ping.com/YOUR-UUID"
