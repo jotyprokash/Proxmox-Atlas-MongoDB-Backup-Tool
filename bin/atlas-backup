@@ -45,8 +45,14 @@ DOW=$(date +%u) # 1-7 (Monday is 1)
 [[ "$FULL_BACKUP_DAY" == "0" ]] && FULL_BACKUP_DAY=7 # Normalize Sunday to 7
 
 MODE="incremental"
-if [[ "$DOW" -eq "$FULL_BACKUP_DAY" ]] || [[ ! -f "$STATE_FILE" ]]; then
+if [[ ! -f "$STATE_FILE" ]]; then
     MODE="full"
+elif [[ "$DOW" -eq "$FULL_BACKUP_DAY" ]]; then
+    # Only do full backup once per day
+    LAST_FULL_TAG="${BACKUP_DIR}/.last_full_$(date +%Y%m%d)"
+    if [[ ! -f "$LAST_FULL_TAG" ]]; then
+        MODE="full"
+    fi
 fi
 
 log_msg "Starting $MODE backup..."
@@ -57,6 +63,7 @@ if [[ "$MODE" == "full" ]]; then
         log_msg "Full backup completed: $BACKUP_FILE"
         NEW_TS=$(get_current_oplog_ts)
         echo "$NEW_TS" > "$STATE_FILE"
+        touch "${BACKUP_DIR}/.last_full_$(date +%Y%m%d)"
         notify "success" "Full backup created on $(hostname)."
     else
         log_msg "ERROR: Full backup failed."
@@ -88,4 +95,5 @@ fi
 # Retention
 if [[ -n "$RETENTION_DAYS" ]] && [[ "$RETENTION_DAYS" -gt 0 ]]; then
     find "$BACKUP_DIR" -type f -name "atlas_*.archive.gz" -mtime +${RETENTION_DAYS} -exec rm -f {} \;
+    find "$BACKUP_DIR" -type f -name ".last_full_*" -mtime +1 -exec rm -f {} \;
 fi

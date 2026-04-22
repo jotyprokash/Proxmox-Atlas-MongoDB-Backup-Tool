@@ -3,7 +3,7 @@ Description=Run Atlas Backup (Full/Incremental)
 
 [Timer]
 # Run every 6 hours
-OnCalendar=00/6:00:00
+OnCalendar=hourly
 Persistent=true
 RandomizedDelaySec=300
 
