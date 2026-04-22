@@ -21,12 +21,17 @@ A production-grade, automated backup solution designed to safely pull MongoDB At
 ##  Quick Start
 
 ### 1. Installation
-Deploy directly to your Proxmox LXC (Ubuntu/Debian):
+Deploy directly to your Proxmox LXC (Ubuntu/Debian) using the interactive onboarding script:
 ```bash
 git clone https://github.com/jotyprokash/Proxmox-Atlas-MongoDB-Backup-Tool.git
 cd Proxmox-Atlas-MongoDB-Backup-Tool
-sudo make install
+sudo ./onboard.sh
 ```
+
+The script will automatically:
+- Install system dependencies (MongoDB Tools, Git, etc.)
+- Prompt you for your Atlas Connection String.
+- Configure and start the automated backup timer.
 
 ### 2. Configuration
 Define your Atlas credentials and strategy:

@@ -2,7 +2,13 @@ PREFIX ?= /usr/local
 CONFDIR ?= /etc/atlas-backup
 INITDIR ?= /etc/systemd/system
 
-.PHONY: install uninstall
+.PHONY: install uninstall deps onboard
+
+deps:
+	apt update && apt install -y curl make git gnupg
+	curl -fsSL https://www.mongodb.org/static/pgp/server-7.0.asc | gpg --dearmor -o /usr/share/keyrings/mongodb-server-7.0.gpg
+	echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-7.0.gpg ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/7.0 multiverse" | tee /etc/apt/sources.list.d/mongodb-org-7.0.list
+	apt update && apt install -y mongodb-database-tools
 
 install:
 	install -d $(PREFIX)/bin
@@ -13,7 +19,11 @@ install:
 	install -m 600 conf/backup.conf.example $(CONFDIR)/backup.conf.example
 	@if [ ! -f $(CONFDIR)/backup.conf ]; then \
 		install -m 600 conf/backup.conf.example $(CONFDIR)/backup.conf; \
-		echo "Created default config at $(CONFDIR)/backup.conf. Please edit it."; \
+		if [ -n "$(ATLAS_URI)" ]; then \
+			sed -i 's|ATLAS_URI=.*|ATLAS_URI="$(ATLAS_URI)"|' $(CONFDIR)/backup.conf; \
+			echo "Configured ATLAS_URI from environment."; \
+		fi; \
+		echo "Created default config at $(CONFDIR)/backup.conf."; \
 	fi
 	
 	install -d $(INITDIR)
@@ -25,6 +35,9 @@ install:
 	systemctl start atlas-backup.timer
 	@echo "Installation complete. Timer is active."
 
+onboard: deps install
+	@echo "Onboarding complete. Please ensure /etc/atlas-backup/backup.conf is configured."
+
 uninstall:
 	systemctl stop atlas-backup.timer || true
 	systemctl disable atlas-backup.timer || true
@@ -33,4 +46,4 @@ uninstall:
 	systemctl daemon-reload
 	rm -f $(PREFIX)/bin/atlas-backup
 	rm -f $(PREFIX)/bin/atlas-restore
-	@echo "Uninstallation complete. Configuration files in $(CONFDIR) were left intact."
+	@echo "Uninstallation complete."
