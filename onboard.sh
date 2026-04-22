@@ -18,6 +18,8 @@ fi
 
 # 2. Install System Dependencies
 echo -e "\n${GREEN}[1/3] Checking system dependencies...${NC}"
+# We must install 'make' first so we can run the Makefile
+apt update && apt install -y make
 make deps
 
 # 3. Interactive Configuration
