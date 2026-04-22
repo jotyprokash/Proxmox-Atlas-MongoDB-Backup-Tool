@@ -63,8 +63,8 @@ EOF
 }
 
 get_current_oplog_ts() {
-    # Returns JSON object: {"t": 123, "i": 1}
-    mongosh "$ATLAS_URI" --quiet --eval 'EJSON.serialize(db.getSiblingDB("local").oplog.rs.find().sort({$natural: -1}).limit(1).next().ts)'
+    # Returns valid JSON: {"$timestamp":{"t":123,"i":1}}
+    mongosh "$ATLAS_URI" --quiet --eval 'JSON.stringify(EJSON.serialize(db.getSiblingDB("local").oplog.rs.find().sort({$natural: -1}).limit(1).next().ts))'
 }
 
 # Determine Strategy
