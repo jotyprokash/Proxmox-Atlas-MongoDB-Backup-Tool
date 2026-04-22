@@ -23,13 +23,19 @@ make deps
 # 3. Interactive Configuration
 echo -e "\n${GREEN}[2/3] Configuring Atlas Connection...${NC}"
 read -p "Enter your MongoDB Atlas URI: " USER_URI
+read -p "Enter your Discord Webhook URL (optional, press Enter to skip): " WEBHOOK
 
 if [ -z "$USER_URI" ]; then
-    echo "No URI provided. We will use the default example.conf."
-    make install
+    echo "No URI provided. Using existing config if available."
 else
     # Install with the provided URI
     ATLAS_URI="$USER_URI" make install
+    
+    # Inject Webhook if provided
+    if [ -n "$WEBHOOK" ]; then
+        sed -i "s|# WEBHOOK_URL=.*|WEBHOOK_URL=\"$WEBHOOK\"|" /etc/atlas-backup/backup.conf
+        echo "Discord notifications enabled."
+    fi
 fi
 
 # 4. Finalize

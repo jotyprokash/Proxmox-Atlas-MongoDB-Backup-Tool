@@ -27,11 +27,29 @@ log_msg() {
 
 notify() {
     local status="$1"
-    local message="$2"
+    local title="$2"
+    local message="$3"
     [[ -z "$WEBHOOK_URL" ]] && return
     
-    local color=$([[ "$status" == "success" ]] && echo "36a64f" || echo "ff0000")
-    local payload="{\"attachments\":[{\"color\":\"${color}\",\"title\":\"Atlas Backup ${status}\",\"text\":\"${message}\"}]}"
+    local color="36a64f" # Default Green
+    case "$status" in
+        "success") color="36a64f" ;;
+        "failure") color="ff0000" ;;
+        "info")    color="3498db" ;;
+        "warning") color="f1c40f" ;;
+    esac
+
+    local payload=$(cat <<EOF
+{
+  "embeds": [{
+    "title": "$title",
+    "description": "$message",
+    "color": $(printf '%d' "0x$color"),
+    "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  }]
+}
+EOF
+)
     curl -s -X POST -H "Content-Type: application/json" -d "$payload" "$WEBHOOK_URL" > /dev/null
 }
 
@@ -56,18 +74,20 @@ elif [[ "$DOW" -eq "$FULL_BACKUP_DAY" ]]; then
 fi
 
 log_msg "Starting $MODE backup..."
+notify "info" "🚀 Backup Started" "Mode: **$MODE**\nServer: \`$(hostname)\`"
 
 if [[ "$MODE" == "full" ]]; then
     BACKUP_FILE="${BACKUP_DIR}/atlas_full_${TIMESTAMP}.archive.gz"
     if mongodump --uri="$ATLAS_URI" --archive="$BACKUP_FILE" --gzip --oplog; then
-        log_msg "Full backup completed: $BACKUP_FILE"
+        FILE_SIZE=$(du -h "$BACKUP_FILE" | cut -f1)
+        log_msg "Full backup completed: $BACKUP_FILE ($FILE_SIZE)"
         NEW_TS=$(get_current_oplog_ts)
         echo "$NEW_TS" > "$STATE_FILE"
         touch "${BACKUP_DIR}/.last_full_$(date +%Y%m%d)"
-        notify "success" "Full backup created on $(hostname)."
+        notify "success" "✅ Full Backup Complete" "File: \`$(basename $BACKUP_FILE)\`\nSize: **$FILE_SIZE**"
     else
         log_msg "ERROR: Full backup failed."
-        notify "failure" "Full backup failed on $(hostname)!"
+        notify "failure" "❌ Full Backup Failed" "Host: \`$(hostname)\`\nCheck logs at: \`$LOG_FILE\`"
         exit 1
     fi
 else
@@ -80,14 +100,15 @@ else
     QUERY="{\"ts\": {\"\$gt\": {\"\$timestamp\": {\"t\": $T, \"i\": $I}}}}"
     
     if mongodump --uri="$ATLAS_URI" --db local --collection oplog.rs --query "$QUERY" --archive="$BACKUP_FILE" --gzip; then
-        log_msg "Incremental slice completed: $BACKUP_FILE"
+        FILE_SIZE=$(du -h "$BACKUP_FILE" | cut -f1)
+        log_msg "Incremental slice completed: $BACKUP_FILE ($FILE_SIZE)"
         # Update checkpoint to the latest TS from the server
         NEW_TS=$(get_current_oplog_ts)
         echo "$NEW_TS" > "$STATE_FILE"
-        notify "success" "Incremental backup created on $(hostname)."
+        notify "success" "🕒 Incremental Sync Complete" "File: \`$(basename $BACKUP_FILE)\`\nSize: **$FILE_SIZE**"
     else
         log_msg "ERROR: Incremental backup failed."
-        notify "failure" "Incremental backup failed on $(hostname)!"
+        notify "failure" "❌ Incremental Backup Failed" "Host: \`$(hostname)\`\nCheck logs at: \`$LOG_FILE\`"
         exit 1
     fi
 fi
