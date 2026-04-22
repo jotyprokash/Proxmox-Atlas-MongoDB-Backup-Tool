@@ -8,7 +8,7 @@ deps:
 	apt update && apt install -y curl make git gnupg
 	curl -fsSL https://www.mongodb.org/static/pgp/server-7.0.asc | gpg --dearmor -o /usr/share/keyrings/mongodb-server-7.0.gpg
 	echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-7.0.gpg ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/7.0 multiverse" | tee /etc/apt/sources.list.d/mongodb-org-7.0.list
-	apt update && apt install -y mongodb-database-tools
+	apt update && apt install -y mongodb-database-tools mongodb-mongosh
 
 install:
 	install -d $(PREFIX)/bin
