@@ -9,7 +9,7 @@
 
 A production-grade, automated backup solution designed to safely pull MongoDB Atlas clusters to local Proxmox LXC infrastructure. Engineered for reliability, observability, and minimal overhead.
 
-![Architecture Diagram](./assets/screenshots/architecture_diagram.png)
+![Architecture Diagram](./assets/screenshots/architecture_diagram.png?v=2)
 
 ##  Key Features
 - **Incremental Pipeline**: Smart Full + Incremental (Oplog-based) backups to reduce bandwidth.
