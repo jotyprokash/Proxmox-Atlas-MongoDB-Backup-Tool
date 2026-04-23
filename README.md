@@ -5,9 +5,10 @@
 [![Ubuntu 24.04](https://img.shields.io/badge/Ubuntu_24.04-E95420?style=flat-square&logo=ubuntu&logoColor=white)](https://ubuntu.com)
 [![Systemd](https://img.shields.io/badge/Systemd-000000?style=flat-square&logo=linux&logoColor=white)](https://systemd.io)
 [![Bash](https://img.shields.io/badge/Bash-4EAA25?style=flat-square&logo=gnu-bash&logoColor=white)](https://www.gnu.org/software/bash/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT)
-[![Maintained](https://img.shields.io/badge/Maintained%3F-yes-green.svg?style=flat-square)](https://github.com/jotyprokash/Proxmox-Atlas-MongoDB-Backup-Tool/graphs/commit-activity)
-[![Implementation Journey](https://img.shields.io/badge/Docs-Implementation_Journey-blueviolet?style=flat-square&logo=gitbook)](./implementation.md)
+[![GNU Make](https://img.shields.io/badge/GNU_Make-000000?style=flat-square&logo=gnu&logoColor=white)](https://www.gnu.org/software/make/)
+[![LXC](https://img.shields.io/badge/LXC-gray?style=flat-square&logo=linux&logoColor=white)](https://linuxcontainers.org/)
+[![Security: TLS](https://img.shields.io/badge/Security-TLS-blue?style=flat-square&logo=openssl&logoColor=white)](https://www.openssl.org/)
+[![Strategy: Full + Incremental](https://img.shields.io/badge/Strategy-Full_%2B_Incremental-success?style=flat-square)](https://github.com/jotyprokash/Proxmox-Atlas-MongoDB-Backup-Tool)
 
 An enterprise-grade, automated backup solution engineered to synchronize MongoDB Atlas clusters with local Proxmox LXC infrastructure. Implements a high-performance **Full + Incremental (Oplog-based)** strategy for data durability and minimal network overhead.
 
