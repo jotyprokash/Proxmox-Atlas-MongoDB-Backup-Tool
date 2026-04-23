@@ -63,8 +63,8 @@ EOF
 }
 
 get_current_oplog_ts() {
-    # Returns valid JSON: {"$timestamp":{"t":123,"i":1}}
-    mongosh "$ATLAS_URI" --quiet --eval 'JSON.stringify(EJSON.serialize(db.getSiblingDB("local").oplog.rs.find().sort({$natural: -1}).limit(1).next().ts))' | grep -Eo '\{"\$timestamp":\{"t":[0-9]+,"i":[0-9]+\}\}' | tail -n 1
+    # Returns t:i format (e.g., 1713840000:1)
+    mongosh "$ATLAS_URI" --quiet --eval 'let ts = db.getSiblingDB("local").oplog.rs.find().sort({$natural: -1}).limit(1).next().ts; print(ts.getTime() + ":" + ts.getInc())' | tail -n 1
 }
 
 # Determine Strategy
@@ -101,9 +101,8 @@ if [[ "$MODE" == "full" ]]; then
     fi
 else
     # Incremental Mode
-    LAST_TS_JSON=$(cat "$STATE_FILE")
-    T=$(echo "$LAST_TS_JSON" | jq -r '."$timestamp".t')
-    I=$(echo "$LAST_TS_JSON" | jq -r '."$timestamp".i')
+    LAST_TS=$(cat "$STATE_FILE")
+    IFS=':' read -r T I <<< "$LAST_TS"
     
     BACKUP_FILE="${BACKUP_DIR}/atlas_incr_${TIMESTAMP}.archive.gz"
     QUERY="{\"ts\": {\"\$gt\": {\"\$timestamp\": {\"t\": $T, \"i\": $I}}}}"
