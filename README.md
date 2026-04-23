@@ -9,6 +9,7 @@
 [![Engine: local.oplog.rs](https://img.shields.io/badge/Engine-local.oplog.rs-blueviolet?style=flat-square)](https://www.mongodb.com/docs/manual/core/replica-set-oplog/)
 [![Security: TLS](https://img.shields.io/badge/Security-TLS-blue?style=flat-square&logo=openssl&logoColor=white)](https://www.openssl.org/)
 [![Strategy: Full + Incremental](https://img.shields.io/badge/Strategy-Full_%2B_Incremental-success?style=flat-square)](https://github.com/jotyprokash/Proxmox-Atlas-MongoDB-Backup-Tool)
+[![DR: Point-in-Time Recovery](https://img.shields.io/badge/DR-Point--in--Time_Recovery-important?style=flat-square)](https://github.com/jotyprokash/Proxmox-Atlas-MongoDB-Backup-Tool)
 
 An enterprise-grade, automated backup solution engineered to synchronize MongoDB Atlas clusters with local Proxmox LXC infrastructure. Implements a high-performance **Full + Incremental (Oplog-based)** strategy for data durability and minimal network overhead.
 
