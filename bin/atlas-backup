@@ -64,7 +64,7 @@ EOF
 
 get_current_oplog_ts() {
     # Returns t:i format (e.g., 1713840000:1)
-    mongosh "$ATLAS_URI" --quiet --eval 'let ts = db.getSiblingDB("local").oplog.rs.find().sort({$natural: -1}).limit(1).next().ts; print(ts.getTime() + ":" + ts.getInc())' | tail -n 1
+    mongosh "$ATLAS_URI" --quiet --eval 'let ts = db.getSiblingDB("local").oplog.rs.find().sort({$natural: -1}).limit(1).next().ts; print(ts.t + ":" + ts.i)' | tail -n 1
 }
 
 # Determine Strategy
