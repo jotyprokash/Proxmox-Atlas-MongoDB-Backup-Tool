@@ -87,7 +87,23 @@ notify "info" "🚀 Backup Started" "Mode: **$MODE**\nServer: \`$(hostname)\`"
 
 if [[ "$MODE" == "full" ]]; then
     BACKUP_FILE="${BACKUP_DIR}/atlas_full_${TIMESTAMP}.archive.gz"
-    if mongodump --uri="$ATLAS_URI" --archive="$BACKUP_FILE" --gzip --oplog; then
+    
+    MAX_RETRIES=3
+    RETRY_COUNT=0
+    SUCCESS=false
+
+    while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+        if mongodump --uri="$ATLAS_URI" --archive="$BACKUP_FILE" --gzip --oplog; then
+            SUCCESS=true
+            break
+        else
+            RETRY_COUNT=$((RETRY_COUNT + 1))
+            log_msg "WARNING: Full dump failed (Attempt $RETRY_COUNT/$MAX_RETRIES). Retrying in 10s..."
+            sleep 10
+        fi
+    done
+
+    if [ "$SUCCESS" = true ]; then
         FILE_SIZE=$(du -h "$BACKUP_FILE" | cut -f1)
         log_msg "Full backup completed: $BACKUP_FILE ($FILE_SIZE)"
         NEW_TS=$(get_current_oplog_ts)
@@ -95,7 +111,7 @@ if [[ "$MODE" == "full" ]]; then
         touch "${BACKUP_DIR}/.last_full_$(date +%Y%m%d)"
         notify "success" "✅ Full Backup Complete" "File: \`$(basename $BACKUP_FILE)\`\nSize: **$FILE_SIZE**"
     else
-        log_msg "ERROR: Full backup failed."
+        log_msg "ERROR: Full backup failed after $MAX_RETRIES attempts."
         notify "failure" "❌ Full Backup Failed" "Host: \`$(hostname)\`\nCheck logs at: \`$LOG_FILE\`"
         exit 1
     fi
@@ -108,7 +124,22 @@ else
     QUERY="{\"ts\": {\"\$gt\": {\"\$timestamp\": {\"t\": $T, \"i\": $I}}}}"
     
     TEMP_DIR=$(mktemp -d)
-    if mongodump --uri="$ATLAS_URI" --db local --collection oplog.rs --query "$QUERY" --out="$TEMP_DIR"; then
+    MAX_RETRIES=3
+    RETRY_COUNT=0
+    SUCCESS=false
+
+    while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+        if mongodump --uri="$ATLAS_URI" --db local --collection oplog.rs --query "$QUERY" --out="$TEMP_DIR"; then
+            SUCCESS=true
+            break
+        else
+            RETRY_COUNT=$((RETRY_COUNT + 1))
+            log_msg "WARNING: Incremental dump failed (Attempt $RETRY_COUNT/$MAX_RETRIES). Retrying in 10s..."
+            sleep 10
+        fi
+    done
+
+    if [ "$SUCCESS" = true ]; then
         if [[ -f "$TEMP_DIR/local/oplog.rs.bson" ]]; then
             gzip -c "$TEMP_DIR/local/oplog.rs.bson" > "$BACKUP_FILE"
             FILE_SIZE=$(du -h "$BACKUP_FILE" | cut -f1)
@@ -121,7 +152,7 @@ else
             notify "info" "ℹ️ No changes" "No new operations to backup since $LAST_TS."
         fi
     else
-        log_msg "ERROR: Incremental backup failed."
+        log_msg "ERROR: Incremental backup failed after $MAX_RETRIES attempts."
         notify "failure" "❌ Incremental Backup Failed" "Host: \`$(hostname)\`\nCheck logs at: \`$LOG_FILE\`"
         exit 1
     fi
