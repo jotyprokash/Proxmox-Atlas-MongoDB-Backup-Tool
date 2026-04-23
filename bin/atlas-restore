@@ -33,7 +33,7 @@ echo "Found latest full backup: $LATEST_FULL"
 
 # 2. Find all Incremental Slices created AFTER the latest full backup
 FULL_DATE=$(echo "$LATEST_FULL" | grep -oE '[0-9]{8}_[0-9]{6}')
-INCREMENTS=$(ls "${BACKUP_DIR}"/atlas_incr_*.archive.gz 2>/dev/null | awk -v d="$FULL_DATE" '$0 > d' | sort)
+INCREMENTS=$(ls "${BACKUP_DIR}"/atlas_incr_*.oplog.bson.gz 2>/dev/null | awk -v d="$FULL_DATE" '$0 > d' | sort)
 
 # 3. Restore Full Base
 echo "Restoring full base..."
@@ -42,16 +42,13 @@ mongorestore --uri="$TARGET_URI" --archive="$LATEST_FULL" --gzip --oplogReplay
 # 4. Replay Incremental Slices
 for INCR in $INCREMENTS; do
     echo "Applying incremental slice: $INCR"
-    # To replay an oplog-only dump, we extract the oplog.rs.bson and treat it as the oplog
+    
     TEMP_DIR=$(mktemp -d)
-    mongorestore --uri="$TARGET_URI" --archive="$INCR" --gzip --extract --dir="$TEMP_DIR"
+    # Decompress the oplog slice into the temp dir as 'oplog.bson'
+    # mongorestore --oplogReplay looks specifically for 'oplog.bson' in the directory
+    zcat "$INCR" > "${TEMP_DIR}/oplog.bson"
     
-    # Locate the bson file (it will be under local/oplog.rs.bson)
-    OPLOG_BSON=$(find "$TEMP_DIR" -name "oplog.rs.bson")
-    
-    if [[ -f "$OPLOG_BSON" ]]; then
-        # mongorestore expects 'oplog.bson' for --oplogReplay
-        mv "$OPLOG_BSON" "${TEMP_DIR}/oplog.bson"
+    if [[ -s "${TEMP_DIR}/oplog.bson" ]]; then
         mongorestore --uri="$TARGET_URI" --oplogReplay "${TEMP_DIR}"
     fi
     
