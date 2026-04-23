@@ -5,71 +5,73 @@
 [![Ubuntu 24.04](https://img.shields.io/badge/Ubuntu_24.04-E95420?style=flat-square&logo=ubuntu&logoColor=white)](https://ubuntu.com)
 [![Systemd](https://img.shields.io/badge/Systemd-000000?style=flat-square&logo=linux&logoColor=white)](https://systemd.io)
 [![Bash](https://img.shields.io/badge/Bash-4EAA25?style=flat-square&logo=gnu-bash&logoColor=white)](https://www.gnu.org/software/bash/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT)
+[![Maintained](https://img.shields.io/badge/Maintained%3F-yes-green.svg?style=flat-square)](https://github.com/jotyprokash/Proxmox-Atlas-MongoDB-Backup-Tool/graphs/commit-activity)
 [![Implementation Journey](https://img.shields.io/badge/Docs-Implementation_Journey-blueviolet?style=flat-square&logo=gitbook)](./implementation.md)
 
-A production-grade, automated backup solution designed to safely pull MongoDB Atlas clusters to local Proxmox LXC infrastructure. Engineered for reliability, observability, and minimal overhead using a **Full + Incremental (Oplog-based)** strategy.
+An enterprise-grade, automated backup solution engineered to synchronize MongoDB Atlas clusters with local Proxmox LXC infrastructure. Implements a high-performance **Full + Incremental (Oplog-based)** strategy for data durability and minimal network overhead.
 
 ![Architecture Diagram](./assets/screenshots/architecture_diagram.png?v=2)
 
-## 🚀 Key Features
-- **Incremental Pipeline**: Smart Full + Incremental backups to minimize bandwidth and storage.
-- **Automated Lifecycle**: 6-hour interval backups managed via `systemd` timers.
-- **Observability**: Integrated logging and Discord/Slack webhook notifications.
-- **Smart Restore**: Automatic "stitching" of the latest full base and all subsequent incremental slices.
-- **Production Hardened**: Designed to run in unprivileged LXC containers with restricted permissions.
+## Key Features
+- **Incremental Pipeline**: Optimized Full + Incremental backups to reduce bandwidth and storage I/O.
+- **Automated Lifecycle**: 6-hour interval automated execution via `systemd` timers.
+- **Advanced Observability**: Integrated logging and webhook support for real-time alerting.
+- **Reliable Recovery**: Automated "stitching" of latest full base and subsequent BSON oplog slices.
+- **Infrastructure Hardening**: Designed for unprivileged LXC environments with strict permission scoping.
 
-## 🛠 Prerequisites
+## Prerequisites
 
-Before installation, ensure you have:
-1.  **Backup Host**: A Proxmox LXC container (Ubuntu/Debian recommended) with internet access.
-2.  **Atlas Access**: 
-    *   The backup server's Public IP must be added to the **Atlas IP Access List**.
-    *   A MongoDB User with `readAnyDatabase` and `clusterMonitor` roles (the latter is required to read the `local.oplog.rs` collection).
-3.  **Port**: Outgoing traffic allowed on port `27017`.
+Deployment requirements:
+1.  **Backup Host**: Proxmox LXC container (Ubuntu/Debian) with standard network egress.
+2.  **Atlas Configuration**: 
+    *   Backup server Public IP authorized in **Atlas IP Access List**.
+    *   Database user provisioned with `readAnyDatabase` and `clusterMonitor` roles.
+3.  **Network**: Outbound connectivity enabled on port `27017`.
 
-## 📦 Quick Start
+## Installation & Setup
 
-### 1. Automated Installation
-Deploy directly to your container using the interactive onboarding script:
+### 1. Automated Deployment
+Clone the repository and execute the interactive onboarding script:
 ```bash
 git clone https://github.com/jotyprokash/Proxmox-Atlas-MongoDB-Backup-Tool.git
 cd Proxmox-Atlas-MongoDB-Backup-Tool
 sudo ./onboard.sh
 ```
 
-### 2. Manual Configuration
-The installer creates a secure configuration file at `/etc/atlas-backup/backup.conf`. You can fine-tune your strategy there:
+### 2. Configuration Management
+System configuration is centralized in `/etc/atlas-backup/backup.conf`:
 ```bash
 sudo nano /etc/atlas-backup/backup.conf
 ```
 | Variable | Description |
 | :--- | :--- |
-| `ATLAS_URI` | Your MongoDB Atlas connection string. |
-| `BACKUP_DIR` | Local path to store the `.archive.gz` and `.oplog.bson.gz` files. |
-| `RETENTION_DAYS` | Number of days to keep backup files before rotation. |
-| `FULL_BACKUP_DAY` | Day of the week (0-6) to trigger a new Full Base backup. |
+| `ATLAS_URI` | MongoDB Atlas connection string. |
+| `BACKUP_DIR` | Local target path for storage of backup archives and slices. |
+| `RETENTION_DAYS` | Data retention policy (automated file rotation). |
+| `FULL_BACKUP_DAY` | Scheduled day for Full Base backup generation (0-6). |
 
-## 🔍 Verification & Operations
+## Operations & Verification
 
-### Trigger Manual Backup
+### Manual Execution
 ```bash
 sudo atlas-backup
 ```
 
-### Monitor Automation
+### Automation Monitoring
 ```bash
-# Check scheduled timer status
+# Verify timer status
 systemctl list-timers atlas-backup.timer
 
-# View real-time logs
+# Inspect service logs
 journalctl -u atlas-backup.service -f
 ```
 
 ### Disaster Recovery
-To restore your database (Full Base + all Incremental Slices):
+Perform a full cluster restoration:
 ```bash
 sudo atlas-restore [TARGET_URI]
 ```
 
-## 📖 Implementation Journey
-For a comprehensive walkthrough of the architectural decisions, Proxmox LXC hardening, and the incremental logic development, see the **[Implementation Journey](./implementation.md)**.
+## Implementation Journey
+For detailed technical documentation on architectural decisions and infrastructure hardening, refer to the **[Implementation Journey](./implementation.md)**.
