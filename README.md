@@ -6,7 +6,7 @@
 [![Systemd](https://img.shields.io/badge/Systemd-000000?style=flat-square&logo=linux&logoColor=white)](https://systemd.io)
 [![Bash](https://img.shields.io/badge/Bash-4EAA25?style=flat-square&logo=gnu-bash&logoColor=white)](https://www.gnu.org/software/bash/)
 [![GNU Make](https://img.shields.io/badge/GNU_Make-000000?style=flat-square&logo=gnu&logoColor=white)](https://www.gnu.org/software/make/)
-[![LXC](https://img.shields.io/badge/LXC-gray?style=flat-square&logo=linux&logoColor=white)](https://linuxcontainers.org/)
+[![Engine: local.oplog.rs](https://img.shields.io/badge/Engine-local.oplog.rs-blueviolet?style=flat-square)](https://www.mongodb.com/docs/manual/core/replica-set-oplog/)
 [![Security: TLS](https://img.shields.io/badge/Security-TLS-blue?style=flat-square&logo=openssl&logoColor=white)](https://www.openssl.org/)
 [![Strategy: Full + Incremental](https://img.shields.io/badge/Strategy-Full_%2B_Incremental-success?style=flat-square)](https://github.com/jotyprokash/Proxmox-Atlas-MongoDB-Backup-Tool)
 
