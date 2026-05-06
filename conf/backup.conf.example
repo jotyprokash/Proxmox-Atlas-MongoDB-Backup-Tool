@@ -1,16 +1,14 @@
-# Atlas MongoDB Connection URI
-ATLAS_URI="mongodb+srv://<USER>:<PASSWORD>@<CLUSTER_URL>/dt-mm-db"
+# MongoDB Atlas Connection String
+ATLAS_URI="mongodb+srv://user:pass@cluster.mongodb.net/db"
 
-# Local directory where backups will be stored
+# Local Storage Path (Recommended: Mount Point to Hardware)
 BACKUP_DIR="/var/lib/atlas-backup"
 
-# Retention policy: Number of days to keep backups
-RETENTION_DAYS=7
+# Data Retention (Days)
+RETENTION_DAYS=15
 
-# Incremental Strategy
-# Set FULL_BACKUP_DAY to 0-6 (0 is Sunday)
-FULL_BACKUP_DAY=0
+# State tracking (Do not change unless necessary)
 STATE_FILE="/var/lib/atlas-backup/checkpoint.json"
 
-# Optional: Webhook URL for success/failure notifications
-# WEBHOOK_URL="https://hc-ping.com/YOUR-UUID"
+# Optional: Discord/Slack Webhook for Alerts
+# WEBHOOK_URL="https://discord.com/api/webhooks/..."

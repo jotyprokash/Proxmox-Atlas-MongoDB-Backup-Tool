@@ -43,6 +43,12 @@ fi
 # 4. Finalize
 echo -e "\n${GREEN}[3/3] Finalizing Installation...${NC}"
 echo -e "${BLUE}Success! The backup service is now active.${NC}"
+echo -e "\n${BLUE}==============================================${NC}"
+echo -e "${GREEN}IMPORTANT: HARDWARE DECOUPLING (RECOMMENDED)${NC}"
+echo -e "To ensure your backups survive if this VM is deleted,"
+echo -e "run this command on your PROXMOX HOST:"
+echo -e "${BLUE}pct set <CT_ID> -mp0 /mnt/pve/your-disk,mp=/var/lib/atlas-backup${NC}"
+echo -e "${BLUE}==============================================${NC}"
 echo -e "Logs: journalctl -u atlas-backup.service -f"
 echo -e "Config: /etc/atlas-backup/backup.conf"
 echo -e "${BLUE}==============================================${NC}"

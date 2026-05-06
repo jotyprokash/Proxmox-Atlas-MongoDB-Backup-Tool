@@ -30,6 +30,10 @@ install:
 	install -m 644 init/atlas-backup.service $(INITDIR)/atlas-backup.service
 	install -m 644 init/atlas-backup.timer $(INITDIR)/atlas-backup.timer
 	
+	# Initialize production data directory
+	mkdir -p /var/lib/atlas-backup
+	chmod 750 /var/lib/atlas-backup
+	
 	systemctl daemon-reload
 	systemctl enable atlas-backup.timer
 	systemctl start atlas-backup.timer
