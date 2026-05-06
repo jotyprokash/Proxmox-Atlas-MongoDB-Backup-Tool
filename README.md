@@ -11,16 +11,16 @@
 [![Strategy: Full + Incremental](https://img.shields.io/badge/Strategy-Full_%2B_Incremental-success?style=flat-square)](https://github.com/jotyprokash/Proxmox-Atlas-MongoDB-Backup-Tool)
 [![DR: Point-in-Time Recovery](https://img.shields.io/badge/DR-Point--in--Time_Recovery-important?style=flat-square)](https://github.com/jotyprokash/Proxmox-Atlas-MongoDB-Backup-Tool)
 
-An enterprise-grade, automated backup solution engineered to synchronize MongoDB Atlas clusters with local Proxmox LXC infrastructure. Implements a high-performance **Full + Incremental (Oplog-based)** strategy for data durability and minimal network overhead.
+An enterprise-grade, automated backup solution engineered to synchronize MongoDB Atlas clusters with local Proxmox LXC infrastructure. Implements a high-performance **Forever Incremental (Oplog-based)** strategy for maximum data durability and zero-waste bandwidth.
 
 ![Architecture Diagram](./assets/screenshots/architecture_diagram.png?v=2)
 
 ## Key Features
-- **Incremental Pipeline**: Optimized Full + Incremental backups to reduce bandwidth and storage I/O.
+- **Incremental Pipeline**: Optimized Forever Incremental backups to reduce bandwidth and storage I/O.
 - **Automated Lifecycle**: 6-hour interval automated execution via `systemd` timers.
 - **Advanced Observability**: Integrated logging and webhook support for real-time alerting.
-- **Reliable Recovery**: Automated "stitching" of latest full base and subsequent BSON oplog slices.
-- **Infrastructure Hardening**: Designed for unprivileged LXC environments with strict permission scoping.
+- **Reliable Recovery**: Automated "stitching" of the bootstrap full base and all subsequent BSON oplog slices.
+- **Hardware Decoupling**: Designed for Proxmox Mount Points to ensure data lives on physical hardware, independent of the LXC lifetime.
 
 ## Prerequisites
 

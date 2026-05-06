@@ -99,12 +99,15 @@ atlas-backup
 ### Manual Backup Test
 ![Manual Backup Success](./assets/screenshots/manual_backup_success.png)
 
-### Systemd Automation
-Verify that the daily timer is scheduled.
+## 7. Production Architecture: Forever Incremental
 
-```bash
-systemctl list-timers --all | grep atlas
-```
+In this upgraded design, we prioritize storage efficiency and hardware decoupling.
 
-![Systemd Timer Active](./assets/screenshots/systemd_timer_active.png)
+### The Lifecycle
+1. **Bootstrap**: On the first run, the script detects no checkpoint and triggers a **Full Backup**.
+2. **Forever Incremental**: Every subsequent run (triggered every 6 hours) only pulls the delta changes from the Atlas Oplog.
+3. **Hardware Storage**: Backups are stored in `/var/lib/atlas-backup`, which is intended to be a **Proxmox Mount Point** mapped to physical hardware.
+
+### Retention Policy
+We maintain a **15-day sliding window** for incremental slices. However, the system includes a **Safety Guard** that prevents the deletion of the "Anchor" Full Backup, ensuring the incremental chain remains unbroken.
 
