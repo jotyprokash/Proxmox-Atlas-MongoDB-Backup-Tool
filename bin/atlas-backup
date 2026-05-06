@@ -15,7 +15,7 @@ source "$CONFIG_FILE"
 : "${ATLAS_URI:?ATLAS_URI must be set}"
 : "${BACKUP_DIR:?BACKUP_DIR must be set}"
 : "${STATE_FILE:=/var/lib/atlas-backup/checkpoint.json}"
-: "${FULL_BACKUP_DAY:=0}" # Default Sunday
+: "${RETENTION_DAYS:=15}"
 
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
 LOG_FILE="${BACKUP_DIR}/atlas_backup.log"
@@ -68,18 +68,9 @@ get_current_oplog_ts() {
 }
 
 # Determine Strategy
-DOW=$(date +%u) # 1-7 (Monday is 1)
-[[ "$FULL_BACKUP_DAY" == "0" ]] && FULL_BACKUP_DAY=7 # Normalize Sunday to 7
-
 MODE="incremental"
 if [[ ! -f "$STATE_FILE" ]]; then
     MODE="full"
-elif [[ "$DOW" -eq "$FULL_BACKUP_DAY" ]]; then
-    # Only do full backup once per day
-    LAST_FULL_TAG="${BACKUP_DIR}/.last_full_$(date +%Y%m%d)"
-    if [[ ! -f "$LAST_FULL_TAG" ]]; then
-        MODE="full"
-    fi
 fi
 
 log_msg "Starting $MODE backup..."
@@ -161,6 +152,19 @@ fi
 
 # Retention
 if [[ -n "$RETENTION_DAYS" ]] && [[ "$RETENTION_DAYS" -gt 0 ]]; then
-    find "$BACKUP_DIR" -type f -name "atlas_*.archive.gz" -mtime +${RETENTION_DAYS} -exec rm -f {} \;
+    log_msg "Running retention cleanup (Policy: ${RETENTION_DAYS} days)..."
+    
+    # 1. Identify the latest full backup (THE BASE) - NEVER DELETE THIS
+    LATEST_FULL=$(ls -t "${BACKUP_DIR}"/atlas_full_*.archive.gz 2>/dev/null | head -n 1)
+
+    # 2. Delete old full backups (excluding the LATEST_FULL anchor)
+    if [[ -n "$LATEST_FULL" ]]; then
+        find "$BACKUP_DIR" -type f -name "atlas_full_*.archive.gz" -mtime +${RETENTION_DAYS} ! -name "$(basename "$LATEST_FULL")" -exec rm -f {} \;
+    fi
+
+    # 3. Delete old incremental slices
+    find "$BACKUP_DIR" -type f -name "atlas_incr_*.oplog.bson.gz" -mtime +${RETENTION_DAYS} -exec rm -f {} \;
+    
+    # 4. Cleanup old tags
     find "$BACKUP_DIR" -type f -name ".last_full_*" -mtime +1 -exec rm -f {} \;
 fi
