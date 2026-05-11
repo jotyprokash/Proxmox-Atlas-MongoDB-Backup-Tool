@@ -39,11 +39,9 @@ sudo ./onboard.sh
 ```
 
 ### 2. Hardware Decoupling (Proxmox Host)
-To ensure your backups survive if the container is deleted, you must run the provisioner on your **Proxmox Host Shell**:
+To ensure backups survive container deletion, run this one-liner on your **Proxmox Host Shell**:
 ```bash
-# Copy init/proxmox-setup.sh to your Proxmox Host
-# Run as root on the host
-bash proxmox-setup.sh
+curl -sSL https://raw.githubusercontent.com/jotyprokash/Proxmox-Atlas-MongoDB-Backup-Tool/main/init/proxmox-setup.sh | bash
 ```
 
 ### 3. Configuration Management
@@ -61,8 +59,10 @@ sudo nano /etc/atlas-backup/backup.conf
 ## Operations & Verification
 
 ### Manual Execution
+If the `atlas-backup` command is not found, ensure `/usr/local/bin` is in your PATH.
 ```bash
-sudo atlas-backup
+export PATH=$PATH:/usr/local/bin
+atlas-backup
 ```
 
 ### Automation Monitoring
