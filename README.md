@@ -39,9 +39,10 @@ sudo ./onboard.sh
 ```
 
 ### 2. Hardware Decoupling (Proxmox Host)
-To ensure backups survive container deletion, run this one-liner on your **Proxmox Host Shell**:
+To ensure backups survive container deletion, run these commands on your **Proxmox Host Shell**:
 ```bash
-curl -sSL https://raw.githubusercontent.com/jotyprokash/Proxmox-Atlas-MongoDB-Backup-Tool/main/init/proxmox-setup.sh | bash
+curl -sSL -o setup.sh https://raw.githubusercontent.com/jotyprokash/Proxmox-Atlas-MongoDB-Backup-Tool/main/init/proxmox-setup.sh
+bash setup.sh
 ```
 
 ### 3. Configuration Management
