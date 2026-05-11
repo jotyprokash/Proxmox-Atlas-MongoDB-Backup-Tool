@@ -16,11 +16,9 @@ An enterprise-grade, automated backup solution engineered to synchronize MongoDB
 ![Architecture Diagram](./assets/screenshots/architecture_diagram.png?v=2)
 
 ## Key Features
-- **Incremental Pipeline**: Optimized Forever Incremental backups to reduce bandwidth and storage I/O.
-- **Automated Lifecycle**: 6-hour interval automated execution via `systemd` timers.
-- **Advanced Observability**: Integrated logging and webhook support for real-time alerting.
-- **Reliable Recovery**: Automated "stitching" of the bootstrap full base and all subsequent BSON oplog slices.
 - **Hardware Decoupling**: Designed for Proxmox Mount Points to ensure data lives on physical hardware, independent of the LXC lifetime.
+- **Hardware-Aware Safety**: Automated detection of mount points with critical alerting if backups are stored on virtual/unsafe storage.
+- **Two-Tier Provisioning**: Automated setup scripts for both the LXC container and the Proxmox Host.
 
 ## Prerequisites
 
@@ -36,12 +34,19 @@ Deployment requirements:
 ### 1. Automated Deployment
 Clone the repository and execute the interactive onboarding script:
 ```bash
-git clone https://github.com/jotyprokash/Proxmox-Atlas-MongoDB-Backup-Tool.git
 cd Proxmox-Atlas-MongoDB-Backup-Tool
 sudo ./onboard.sh
 ```
 
-### 2. Configuration Management
+### 2. Hardware Decoupling (Proxmox Host)
+To ensure your backups survive if the container is deleted, you must run the provisioner on your **Proxmox Host Shell**:
+```bash
+# Copy init/proxmox-setup.sh to your Proxmox Host
+# Run as root on the host
+bash proxmox-setup.sh
+```
+
+### 3. Configuration Management
 System configuration is centralized in `/etc/atlas-backup/backup.conf`:
 ```bash
 sudo nano /etc/atlas-backup/backup.conf
@@ -68,6 +73,11 @@ systemctl list-timers atlas-backup.timer
 # Inspect service logs
 journalctl -u atlas-backup.service -f
 ```
+
+### Hardware Health Checks
+The tool automatically validates your storage environment before every backup.
+- **Green**: `HEALTH_CHECK: Hardware decoupling verified` -> Backups are safe on physical disks.
+- **Red**: `CRITICAL_WARNING: Hardware decoupling NOT DETECTED!` -> Backups are at risk on virtual storage. An alert is sent to the configured Webhook.
 
 ### Disaster Recovery
 Perform a full cluster restoration:

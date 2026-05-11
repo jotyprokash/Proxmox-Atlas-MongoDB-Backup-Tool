@@ -62,6 +62,21 @@ EOF
     curl -s -X POST -H "Content-Type: application/json" -d "$payload" "$WEBHOOK_URL" > /dev/null
 }
 
+check_hardware_decoupling() {
+    local target="/var/lib/atlas-backup"
+    
+    # Check if the directory is a mount point
+    if mountpoint -q "$target"; then
+        log_msg "HEALTH_CHECK: Hardware decoupling verified (Mount Point Detected)."
+        return 0
+    else
+        log_msg "CRITICAL_WARNING: Hardware decoupling NOT DETECTED!"
+        log_msg "Backups are being saved to VIRTUAL storage. Data will be lost if container is deleted."
+        notify "warning" "UNSAFE STORAGE ALERT" "DANGER: Hardware decoupling not detected on \`$(hostname)\`.\nData is being saved to the virtual disk instead of physical hardware."
+        return 1
+    fi
+}
+
 get_current_oplog_ts() {
     # Returns t:i format (e.g., 1713840000:1)
     mongosh "$ATLAS_URI" --quiet --eval 'let ts = db.getSiblingDB("local").oplog.rs.find().sort({$natural: -1}).limit(1).next().ts; print(ts.t + ":" + ts.i)' | tail -n 1
@@ -72,6 +87,9 @@ MODE="incremental"
 if [[ ! -f "$STATE_FILE" ]]; then
     MODE="full"
 fi
+
+# Validate Hardware Persistence
+check_hardware_decoupling || true # We continue but with warnings logged/sent
 
 log_msg "Starting $MODE backup..."
 notify "info" "Backup Started" "Mode: **$MODE**\nServer: \`$(hostname)\`"
